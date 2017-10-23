@@ -10,7 +10,8 @@
         "vlucas/phpdotenv": "~2.2",
         "tnew/common": "dev-master",
         "league/flysystem": "~1.0",
-        "johnlui/aliyun-oss": "~2.0"
+        "johnlui/aliyun-oss": "~2.0",
+        "ramsey/uuid": "~3.6.1"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
