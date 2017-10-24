@@ -13,5 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class File extends Model
 {
+    protected $table = 'files';
     protected $fillable = ['uuid', 'path', 'original_name', 'provider'];
+    protected $hidden = [];
 }
