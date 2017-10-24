@@ -20,7 +20,7 @@ class FileUpload
     private $path;
     private $bucket;
     private $compress = true;
-    private $width = 8800;
+    private $width = 1600;
     private $height = null;
 
     public function __construct()
