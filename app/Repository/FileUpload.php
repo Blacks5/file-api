@@ -13,7 +13,7 @@ use EasyWeChat\Foundation\Application;
 use Illuminate\Http\Request;
 use Intervention\Image\ImageManager;
 use Ramsey\Uuid\Uuid;
-use App\Services\OSS;
+use App\Services\OSS; 
 
 class FileUpload
 {
