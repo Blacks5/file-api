@@ -20,7 +20,7 @@ class FileUpload
     private $path;
     private $bucket;
     private $compress = true;
-    private $width = 1600;
+    private $width = 8800;
     private $height = null;
 
     public function __construct()
@@ -68,6 +68,7 @@ class FileUpload
             $img = $manage->make($filePath);
             $img->resize($this->width, $this->height, function($constraint){
                 $constraint->aspectRatio();
+                $constraint->upsize();
             });
             $img->orientate();
             $img->save($filePath,75);
