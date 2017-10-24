@@ -45,10 +45,17 @@ class FileController extends Controller
         ]);
     }
 
+    /**
+     * 批量获取图片链接地址
+     * http://loaclhost/v1/file?images[]=xxxx&images[]=xxxxx
+     * @param Request $request
+     * @return static
+     * @author OneStep
+     */
     public function more(Request $request)
     {
         $get = new FileGet();
-        $files = $get->getMoreFile($request);
+        $files = $get->getMoreFile($request->input('images'));
         return Response::success([
             'path' => $files
         ]);
@@ -73,7 +80,7 @@ class FileController extends Controller
         }
     }
 
-    public function destory()
+    public function destroy($uuid)
     {
 
     }
