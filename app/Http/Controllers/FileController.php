@@ -10,6 +10,7 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Response;
+use App\Services\FileDestroy;
 use App\Services\FileGet;
 use App\Services\FileUpload;
 use App\Services\OSS;
@@ -59,6 +60,7 @@ class FileController extends Controller
         return Response::success([
             'path' => $files
         ]);
+        return false;
     }
 
     /**
@@ -82,7 +84,13 @@ class FileController extends Controller
 
     public function destroy($uuid)
     {
-
+        $destroy = new FileDestroy();
+        if($destroy->destroyFile($uuid)){
+            return Response::success([
+                'status' => 1,
+                'message' => '删除成功!'
+            ]);
+        }
     }
 
 }
