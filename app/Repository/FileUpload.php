@@ -13,6 +13,7 @@ use EasyWeChat\Foundation\Application;
 use Illuminate\Http\Request;
 use Intervention\Image\ImageManager;
 use Ramsey\Uuid\Uuid;
+use App\Services\OSS;
 
 class FileUpload
 {
@@ -79,6 +80,7 @@ class FileUpload
         if($upload){
             $data = $this->saveToDb($path,'aliyun');
             if($data){
+                unlink($path);
                 return ['status'=>1,'message'=>'上传成功','data'=>$data];
             }
         }
