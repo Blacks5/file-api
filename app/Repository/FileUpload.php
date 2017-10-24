@@ -6,7 +6,7 @@
  * Time: 17:39
  */
 
-namespace App\Services;
+namespace App\Repository;
 
 
 use EasyWeChat\Foundation\Application;

@@ -6,10 +6,10 @@
  * Time: 11:14
  */
 
-namespace App\Services;
+namespace App\Repository;
 
 
-use App\File;
+use App\Models\File;
 
 class FileDestroy
 {

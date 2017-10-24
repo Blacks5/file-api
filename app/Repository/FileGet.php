@@ -6,13 +6,11 @@
  * Time: 9:26
  */
 
-namespace App\Services;
+namespace App\Repository;
 
 
-use App\File;
+use App\Models\File;
 use Carbon\Carbon;
-use Faker\Provider\cs_CZ\DateTime;
-use GuzzleHttp\Psr7\Request;
 
 class FileGet
 {
