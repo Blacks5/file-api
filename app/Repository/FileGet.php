@@ -6,13 +6,11 @@
  * Time: 9:26
  */
 
-namespace App\Services;
+namespace App\Repository;
 
 
-use App\File;
+use App\Models\File;
 use Carbon\Carbon;
-use Faker\Provider\cs_CZ\DateTime;
-use GuzzleHttp\Psr7\Request;
 
 class FileGet
 {
@@ -31,15 +29,15 @@ class FileGet
 
     /**
      * 批量获取图片
-     * @param $uuids
+     * @param $uuid
      * @return array
      * @author OneStep
      */
-    public function getMoreFile($uuids)
+    public function getMoreFile($uuid)
     {
         $data = [];
-        if(is_array($uuids)){
-            foreach ($uuids as $k => $v){
+        if(is_array($uuid)){
+            foreach ($uuid as $k => $v){
                 $data[$k]['uuid'] = $v;
                 $data[$k]['path'] = $this->getFile($v);
             }

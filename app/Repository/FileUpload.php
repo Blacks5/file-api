@@ -6,13 +6,14 @@
  * Time: 17:39
  */
 
-namespace App\Services;
+namespace App\Repository;
 
 
-use App\File;
+use EasyWeChat\Foundation\Application;
 use Illuminate\Http\Request;
 use Intervention\Image\ImageManager;
 use Ramsey\Uuid\Uuid;
+use App\Services\OSS;
 
 class FileUpload
 {
@@ -20,7 +21,7 @@ class FileUpload
     private $path;
     private $bucket;
     private $compress = true;
-    private $width = 8800;
+    private $width = 1600;
     private $height = null;
 
     public function __construct()
@@ -30,6 +31,12 @@ class FileUpload
         $this->bucket = env('OSS_TEST_BUCKET');
     }
 
+    /**
+     * 阿里云oss上传
+     * @param Request $request
+     * @return array
+     * @author OneStep
+     */
     public function AliyunUpload(Request $request)
     {
         $file = $request->file('file');
@@ -55,9 +62,57 @@ class FileUpload
     }
 
     /**
+     * 将微信图片上传到OSS,并删除服务器文件
+     * @param $media_id
+     * @return array
+     * @author OneStep
+     */
+    public function wechatUpload($media_id)
+    {
+        $path = $this->getWechatFile($media_id);
+        $upload = OSS::publicUpload(
+            $this->bucket,
+            $this->path.$this->uuid,
+            $path,
+            ['ContentType'=>'image/jpeg']
+        );
+
+        if($upload){
+            $data = $this->saveToDb($path,'aliyun');
+            if($data){
+                unlink($path);
+                return ['status'=>1,'message'=>'上传成功','data'=>$data];
+            }
+        }
+        return [
+            'status' => 0,
+            'message' => '上传失败!'
+        ];
+
+    }
+
+    /**
+     * 获取微信图片地址,保存到服务器,返回服务器的图片地址
+     * @param $media_id
+     * @return string
+     * @author OneStep
+     */
+    private function getWechatFile($media_id)
+    {
+        $app = new Application(config('wechat'));
+        $material = $app->material;
+
+        $images = $material->get($media_id);
+        $fileName = strtotime('Ymd').rand(1000,9999).'.jpg';
+        file_put_contents(strtotime('Ymd').rand(1000,9999).'jpg',$images);
+        return $fileName;
+    }
+
+    /**
      * 返回上传文件的路径(根据compress判断是否压缩)
      * @param Request $request
      * @return string
+     * @author OneStep
      */
     private function makeImages(Request $request)
     {

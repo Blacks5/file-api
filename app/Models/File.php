@@ -6,12 +6,9 @@
  * Time: 18:11
  */
 
-namespace App;
+namespace App\Models;
 
-
-use Illuminate\Database\Eloquent\Model;
-
-class File extends Model
+class File extends BaseModel
 {
     protected $table = 'files';
     protected $fillable = ['uuid', 'path', 'original_name', 'provider'];

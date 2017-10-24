@@ -10,21 +10,13 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Response;
-use App\Services\FileDestroy;
-use App\Services\FileGet;
-use App\Services\FileUpload;
-use App\Services\OSS;
-use Carbon\Carbon;
+use App\Repository\FileDestroy;
+use App\Repository\FileGet;
+use App\Repository\FileUpload;
 use Illuminate\Http\Request;
-use Ramsey\Uuid\Uuid;
 
 class FileController extends Controller
 {
-    private $bucket = '';
-    public function __construct()
-    {
-        $this->bucket = env('OSS_TEST_BUCKET');
-    }
 
     public function index()
     {
@@ -82,6 +74,43 @@ class FileController extends Controller
         }
     }
 
+    /**
+     * 获取微信图片上传到OSS
+     * @param $media_id
+     * @return static
+     * @author OneStep
+     */
+    public function wechat($media_id)
+    {
+        $upload = new FileUpload();
+        $file = $upload->wechatUpload($media_id);
+        if($file){
+            return Response::success([
+                'data' => $file['data']
+            ]);
+        }
+    }
+
+    public function lists()
+    {
+        /*$app = new Application(config('wechat'));
+        $m = $app->material;
+        dd($m->lists('image',1,20));*/
+        $file = file_get_contents("https://mmbiz.qpic.cn/mmbiz_jpg/9UCDk3ibhRgHN24RM2uzibAwkV7C0qxoygiaUsqsKK1cynmOWYaVlboyPnkHK1LSTMjGEPZDexaNZTN5HR7B16ibmQ/640");
+        $msg = new FileUpload();
+        $fileName = 'images/'.date('Ymd').rand(1000,9999).'.jpg';
+        file_put_contents($fileName,$file);
+        $msg->wechatUpload($fileName);
+        //
+
+    }
+
+    /**
+     * 删除图片及数据库信息
+     * @param $uuid
+     * @return static
+     * @author OneStep
+     */
     public function destroy($uuid)
     {
         $destroy = new FileDestroy();
