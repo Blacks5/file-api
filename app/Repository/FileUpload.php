@@ -9,7 +9,7 @@
 namespace App\Services;
 
 
-use App\File;
+use EasyWeChat\Foundation\Application;
 use Illuminate\Http\Request;
 use Intervention\Image\ImageManager;
 use Ramsey\Uuid\Uuid;
@@ -22,7 +22,6 @@ class FileUpload
     private $compress = true;
     private $width = 1600;
     private $height = null;
-    private $wechatUrl = "https://api.weixin.qq.com/cgi-bin/material/get_material";
 
     public function __construct()
     {
@@ -61,32 +60,57 @@ class FileUpload
 
     }
 
+    /**
+     * 将微信图片上传到OSS,并删除服务器文件
+     * @param $media_id
+     * @return array
+     * @author OneStep
+     */
     public function wechatUpload($media_id)
     {
-        $this->getWechatFile($media_id);
+        $path = $this->getWechatFile($media_id);
+        $upload = OSS::publicUpload(
+            $this->bucket,
+            $this->path.$this->uuid,
+            $path,
+            ['ContentType'=>'image/jpeg']
+        );
+
+        if($upload){
+            $data = $this->saveToDb($path,'aliyun');
+            if($data){
+                return ['status'=>1,'message'=>'上传成功','data'=>$data];
+            }
+        }
+        return [
+            'status' => 0,
+            'message' => '上传失败!'
+        ];
+
     }
 
+    /**
+     * 获取微信图片地址,保存到服务器,返回服务器的图片地址
+     * @param $media_id
+     * @return string
+     * @author OneStep
+     */
     private function getWechatFile($media_id)
     {
-        $url = $this->wechatUrl .'?access_token=' . env('WECHAT_ACCESS_TOKEN');
-        $postData = http_build_query($media_id);
-        $options = [
-          'http'=> [
-            'method'=> 'POST',
-              'header' => 'Content-type:application/x-www-form-urlencoded',
-              'content' => $postData,
-              'timeout' => 15 * 60
-          ],
-        ];
-        $context = stream_context_create($options);
-        $result = file_get_contents($this->wechatUrl, false, $context);
-        dd($result);
+        $app = new Application(config('wechat'));
+        $material = $app->material;
+
+        $images = $material->get($media_id);
+        $fileName = strtotime('Ymd').rand(1000,9999).'.jpg';
+        file_put_contents(strtotime('Ymd').rand(1000,9999).'jpg',$images);
+        return $fileName;
     }
 
     /**
      * 返回上传文件的路径(根据compress判断是否压缩)
      * @param Request $request
      * @return string
+     * @author OneStep
      */
     private function makeImages(Request $request)
     {
