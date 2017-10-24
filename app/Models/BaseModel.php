@@ -6,10 +6,18 @@
  * Time: 16:58
  */
 
-namespace App;
+namespace App\Models;
 
+use Illuminate\Database\Eloquent\Model;
 
-class BaseModel
+abstract class BaseModel extends Model
 {
 
+    const MASK = [];
+    protected $dateFormat = 'Y-m-d H:i:s';
+
+    protected function asJson($value)
+    {
+        return json_encode($value, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+    }
 }
