@@ -10,13 +10,11 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Response;
-use App\Services\FileDestroy;
-use App\Services\FileGet;
-use App\Services\FileUpload;
-use App\Services\OSS;
-use Carbon\Carbon;
+use App\Repository\FileDestroy;
+use App\Repository\FileGet;
+use App\Repository\FileUpload;
+use EasyWeChat\Foundation\Application;
 use Illuminate\Http\Request;
-use Ramsey\Uuid\Uuid;
 
 class FileController extends Controller
 {
@@ -86,6 +84,20 @@ class FileController extends Controller
     {
         $upload = new FileUpload();
         $file = $upload->wechatUpload($media_id);
+    }
+
+    public function lists()
+    {
+        /*$app = new Application(config('wechat'));
+        $m = $app->material;
+        dd($m->lists('image',1,20));*/
+        $file = file_get_contents("https://mmbiz.qpic.cn/mmbiz_jpg/9UCDk3ibhRgHN24RM2uzibAwkV7C0qxoygiaUsqsKK1cynmOWYaVlboyPnkHK1LSTMjGEPZDexaNZTN5HR7B16ibmQ/640");
+        $msg = new FileUpload();
+        $fileName = 'images/'.date('Ymd').rand(1000,9999).'.jpg';
+        file_put_contents($fileName,$file);
+        $msg->wechatUpload($fileName);
+        //
+
     }
 
     public function destroy($uuid)
