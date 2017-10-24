@@ -82,6 +82,12 @@ class FileController extends Controller
         }
     }
 
+    public function wechat($media_id)
+    {
+        $upload = new FileUpload();
+        $file = $upload->wechatUpload($media_id);
+    }
+
     public function destroy($uuid)
     {
         $destroy = new FileDestroy();

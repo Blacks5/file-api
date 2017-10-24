@@ -22,6 +22,7 @@ class FileUpload
     private $compress = true;
     private $width = 1600;
     private $height = null;
+    private $wechatUrl = "https://api.weixin.qq.com/cgi-bin/material/get_material";
 
     public function __construct()
     {
@@ -30,6 +31,12 @@ class FileUpload
         $this->bucket = env('OSS_TEST_BUCKET');
     }
 
+    /**
+     * 阿里云oss上传
+     * @param Request $request
+     * @return array
+     * @author OneStep
+     */
     public function AliyunUpload(Request $request)
     {
         $file = $request->file('file');
@@ -52,6 +59,28 @@ class FileUpload
     public function QiniuUpload()
     {
 
+    }
+
+    public function wechatUpload($media_id)
+    {
+        $this->getWechatFile($media_id);
+    }
+
+    private function getWechatFile($media_id)
+    {
+        $url = $this->wechatUrl .'?access_token=' . env('WECHAT_ACCESS_TOKEN');
+        $postData = http_build_query($media_id);
+        $options = [
+          'http'=> [
+            'method'=> 'POST',
+              'header' => 'Content-type:application/x-www-form-urlencoded',
+              'content' => $postData,
+              'timeout' => 15 * 60
+          ],
+        ];
+        $context = stream_context_create($options);
+        $result = file_get_contents($this->wechatUrl, false, $context);
+        dd($result);
     }
 
     /**

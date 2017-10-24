@@ -31,15 +31,15 @@ class FileGet
 
     /**
      * 批量获取图片
-     * @param $uuids
+     * @param $uuid
      * @return array
      * @author OneStep
      */
-    public function getMoreFile($uuids)
+    public function getMoreFile($uuid)
     {
         $data = [];
-        if(is_array($uuids)){
-            foreach ($uuids as $k => $v){
+        if(is_array($uuid)){
+            foreach ($uuid as $k => $v){
                 $data[$k]['uuid'] = $v;
                 $data[$k]['path'] = $this->getFile($v);
             }

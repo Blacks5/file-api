@@ -12,7 +12,8 @@
         "league/flysystem": "~1.0",
         "johnlui/aliyun-oss": "~2.0",
         "ramsey/uuid": "~3.6.1",
-        "intervention/image": "^2.4"
+        "intervention/image": "^2.4",
+        "overtrue/laravel-wechat": "^3.1"
 
     },
     "require-dev": {
