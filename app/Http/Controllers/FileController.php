@@ -13,6 +13,7 @@ use App\Http\Response;
 use App\Repository\FileDestroy;
 use App\Repository\FileGet;
 use App\Repository\FileUpload;
+use EasyWeChat\Foundation\Application;
 use Illuminate\Http\Request;
 
 class FileController extends Controller
@@ -58,9 +59,8 @@ class FileController extends Controller
 
     /**
      * 上传文件
-     * fileName 2017/10/...
-     * @param Request $request
-     * @return static
+     * @param Request $request->file('image')
+     * @return Response
      * @author OneStep
      */
     public function store(Request $request)
@@ -77,7 +77,7 @@ class FileController extends Controller
     /**
      * 获取微信图片上传到OSS
      * @param $media_id
-     * @return static
+     * @return Response
      * @author OneStep
      */
     public function wechat($media_id)
@@ -102,7 +102,7 @@ class FileController extends Controller
     /**
      * 删除图片及数据库信息
      * @param $uuid
-     * @return static
+     * @return Response
      * @author OneStep
      */
     public function destroy($uuid)

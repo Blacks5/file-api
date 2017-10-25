@@ -20,14 +20,29 @@ class Aliyun implements BaseUpload
         $this->bucket = env('OSS_TEST_BUCKET');
     }
 
-    public function upload($key, $filePath, $mimeType = 'image/jpg')
+    /**
+     * 上传操作
+     * @param $key '2017/10/'
+     * @param $uuid '28383b8985ab4c319653e2a6fc37fa94'
+     * @param $filePath '要上传文件的路径'
+     * @param string $mimeType
+     * @return array
+     * @author OneStep
+     */
+    public function upload($key, $uuid,$filePath, $mimeType = 'image/jpeg')
     {
         $upload = OSS::publicUpload(
           $this->bucket,
-          $key,
+          $key.$uuid,
           $filePath,
           ['ContentType' => $mimeType]
         );
-        return $upload;
+         if($upload){
+             $this->destroyImg($filePath);
+             return [
+                 'uuid' => $uuid,
+                 'path' => $key,
+             ];
+         }
     }
 }

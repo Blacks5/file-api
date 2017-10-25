@@ -13,10 +13,8 @@ use App\Models\File;
 use App\Repository\Upload\Aliyun;
 use EasyWeChat\Foundation\Application;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Ramsey\Uuid\Uuid;
-use App\Services\OSS;
 
 trait FileUpload
 {
@@ -28,8 +26,6 @@ trait FileUpload
 
     public function __construct()
     {
-        $this->uuid = Uuid::uuid4()->getHex();
-        $this->path = date('Y/m').'/';
         switch ($this->storageProviders){
             case 'aliyun':
                 $this->driver = new Aliyun();
@@ -46,23 +42,19 @@ trait FileUpload
      * @return array
      * @author OneStep
      */
-    public function Upload(Request $request)
+    public function upload(Request $request)
     {
         $fileInfo = $this->getPath($request);
-
         $uuid = $this->getUuid();
-        $key = strtotime('Y/m/').$uuid;
+        $key = strtotime('Y/m/');
         $filePath = $fileInfo['path'];
         $mimeType = $fileInfo['mimeType'];
 
-
-
-        $upload = $this->driver->upload($key, $filePath, $mimeType);
+        $upload = $this->driver->upload($key, $uuid, $filePath, $mimeType);
         if($upload){
-            $data = $this->saveToDb($filePath, $this->storageProviders);
-            if($data){
-                return ['status'=>1, 'message'=>'上传文件成功','data'=>$data];
-            }
+            $data = $this->saveToDb($upload, $fileInfo['realName'], $this->storageProviders);
+            $this->destroyImg($filePath);
+            return ['status'=>$data['status'], 'message'=>$data['message'],'data'=>$data];
         }
         return ['status'=>0, 'message'=>'上传文件失败', 'data'=>''];
     }
@@ -89,8 +81,8 @@ trait FileUpload
         $material = $app->material;
 
         $images = $material->get($media_id);
-        $fileName = strtotime('Ymd').rand(1000,9999).'.jpg';
-        file_put_contents(strtotime('Ymd').rand(1000,9999).'jpg',$images);
+        $fileName = 'images/wx/'.strtotime('Ymd').rand(1000,9999).'.jpg';
+        file_put_contents($fileName,$images);
         return $fileName;
     }
 
@@ -102,14 +94,18 @@ trait FileUpload
      */
     private function getPath(Request $request)
     {
-        if(empty($request->file('file'))){
-            $filePath = $this->getWeChatFile($request->input('file'));
-            $fileMimeType = 'image/jpg';
+        //判断上传文件还是微信media_id
+        if(empty($request->file('image'))){
+            $filePath = $this->getWeChatFile($request->input('image'));
+
+            $fileMimeType = 'image/jpeg';
+            $fileName = $filePath;
         }else{
-            $file = $request->file('file');
+            $file = $request->file('image');
             $fileMimeType = $file->getClientMimeType();
             $filePath = $file->getRealPath();
-        }
+            $fileName = $file->getFilename();
+         }
 
         if($this->compress){
             $manage = new ImageManager(['driver'=>'gd']);
@@ -123,46 +119,65 @@ trait FileUpload
         }
 
         return $fileInfo = [
-            'Path' => $filePath,
-            'mimeType' => $fileMimeType
+            'path' => $filePath,
+            'mimeType' => $fileMimeType,
+            'realName' => $fileName
         ];
     }
 
     /**
      * 保存已经上传的图片信息
-     * @param $realName 文件名称
-     * @param $provider 上传的服务商
-     * @return bool
+     * @param $info 'array([uuid,path])'
+     * @param $realName '文件名称'
+     * @param $provider '上传的服务商'
+     * @return array
      * @author OneStep
      */
-    private function saveToDb($realName,$provider)
+    private function saveToDb($info, $realName, $provider)
     {
         $file = new File();
-        $file->uuid = $this->uuid;
-        $file->path = $this->path;
+        $file->uuid = $info['uuid'];
+        $file->path = $info['path'];
         $file->original_name = $realName;
         $file->provider = $provider;
         //$file->extended_data = $info; 扩展数据 json格式  暂时不用
         if($file->save()){
-            return $this->getReturnMessage($realName,$provider);
+            return $this->getReturnMessage($info, $realName, $provider);
         }
-        return false;
+        return ['status'=>0, 'message'=>'文件保存数据库失败'];
     }
 
     /**
      * 返回上传图片的相关信息
+     * @param $info
      * @param $realName
      * @param $provider
      * @return array
      * @author OneStep
      */
-    private function getReturnMessage($realName,$provider)
+    private function getReturnMessage($info, $realName,$provider)
     {
         return $data = [
+            'status' => 1,
+            'message' => '文件保存成功',
             'realName' => $realName,
-            'uuid' => $this->uuid,
-            'path' => $this->path,
+            'uuid' => $info['uuid'],
+            'path' => $info['path'],
             'provider' => $provider
         ];
+    }
+
+    /**
+     * 删除保存在服务器的图片(针对微信)
+     * @param $realPath
+     * @return bool
+     * @author OneStep
+     */
+    private function destroyImg($realPath)
+    {
+        if(strpos($realPath, 'images/wx/')==0){
+            unlink($realPath);
+        }
+        return true;
     }
 }

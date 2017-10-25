@@ -16,5 +16,5 @@ interface BaseUpload
      * @return mixed
      * @author OneStep
      */
-    public function upload($path, $url, $mimeType = 'image/jpg');
+    public function upload($path, $uuid, $filePath, $mimeType = 'image/jpg');
 }
