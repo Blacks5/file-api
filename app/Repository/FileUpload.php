@@ -9,46 +9,57 @@
 namespace App\Repository;
 
 
+use App\Models\File;
+use App\Repository\Upload\Aliyun;
 use EasyWeChat\Foundation\Application;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Ramsey\Uuid\Uuid;
-use App\Services\OSS; 
+use App\Services\OSS;
 
-class FileUpload
+trait FileUpload
 {
-    private $uuid;
-    private $path;
-    private $bucket;
     private $compress = true;
     private $width = 1600;
     private $height = null;
+    private $storageProviders = 'aliyun';
+    private $driver;
 
     public function __construct()
     {
         $this->uuid = Uuid::uuid4()->getHex();
         $this->path = date('Y/m').'/';
-        $this->bucket = env('OSS_TEST_BUCKET');
+        switch ($this->storageProviders){
+            case 'aliyun':
+                $this->driver = new Aliyun();
+                break;
+            case 'qiniu':
+                $this->driver = new Qiniu();
+                break;
+        }
     }
 
     /**
-     * 阿里云oss上传
+     * 通用上传
      * @param Request $request
      * @return array
      * @author OneStep
      */
-    public function AliyunUpload(Request $request)
+    public function Upload(Request $request)
     {
-        $file = $request->file('file');
-        $options = ['ContentType'=>$file->getClientMimeType()];
-        $upload = OSS::publicUpload(
-            $this->bucket,
-            $this->path . $this->uuid,
-            $this->makeImages($request),
-            $options
-        );
+        $fileInfo = $this->getPath($request);
+
+        $uuid = $this->getUuid();
+        $key = strtotime('Y/m/').$uuid;
+        $filePath = $fileInfo['path'];
+        $mimeType = $fileInfo['mimeType'];
+
+
+
+        $upload = $this->driver->upload($key, $filePath, $mimeType);
         if($upload){
-            $data = $this->saveToDb($file->getRealPath(),'aliyun');
+            $data = $this->saveToDb($filePath, $this->storageProviders);
             if($data){
                 return ['status'=>1, 'message'=>'上传文件成功','data'=>$data];
             }
@@ -56,39 +67,14 @@ class FileUpload
         return ['status'=>0, 'message'=>'上传文件失败', 'data'=>''];
     }
 
-    public function QiniuUpload()
-    {
-
-    }
-
     /**
-     * 将微信图片上传到OSS,并删除服务器文件
-     * @param $media_id
-     * @return array
+     * 设置上传图片的UUID
+     * @return string
      * @author OneStep
      */
-    public function wechatUpload($media_id)
+    private function getUuid()
     {
-        $path = $this->getWechatFile($media_id);
-        $upload = OSS::publicUpload(
-            $this->bucket,
-            $this->path.$this->uuid,
-            $path,
-            ['ContentType'=>'image/jpeg']
-        );
-
-        if($upload){
-            $data = $this->saveToDb($path,'aliyun');
-            if($data){
-                unlink($path);
-                return ['status'=>1,'message'=>'上传成功','data'=>$data];
-            }
-        }
-        return [
-            'status' => 0,
-            'message' => '上传失败!'
-        ];
-
+        return Uuid::uuid4()->getHex();
     }
 
     /**
@@ -97,7 +83,7 @@ class FileUpload
      * @return string
      * @author OneStep
      */
-    private function getWechatFile($media_id)
+    private function getWeChatFile($media_id)
     {
         $app = new Application(config('wechat'));
         $material = $app->material;
@@ -111,13 +97,20 @@ class FileUpload
     /**
      * 返回上传文件的路径(根据compress判断是否压缩)
      * @param Request $request
-     * @return string
+     * @return array
      * @author OneStep
      */
-    private function makeImages(Request $request)
+    private function getPath(Request $request)
     {
-        $file = $request->file('file');
-        $filePath = $file->getRealPath();
+        if(empty($request->file('file'))){
+            $filePath = $this->getWeChatFile($request->input('file'));
+            $fileMimeType = 'image/jpg';
+        }else{
+            $file = $request->file('file');
+            $fileMimeType = $file->getClientMimeType();
+            $filePath = $file->getRealPath();
+        }
+
         if($this->compress){
             $manage = new ImageManager(['driver'=>'gd']);
             $img = $manage->make($filePath);
@@ -129,7 +122,10 @@ class FileUpload
             $img->save($filePath,75);
         }
 
-        return $filePath;
+        return $fileInfo = [
+            'Path' => $filePath,
+            'mimeType' => $fileMimeType
+        ];
     }
 
     /**

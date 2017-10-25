@@ -9,7 +9,12 @@
 namespace App\Repository\Upload;
 
 
-class BaseUpload
+interface BaseUpload
 {
-
+    /**
+     * 上传方法
+     * @return mixed
+     * @author OneStep
+     */
+    public function upload($path, $url, $mimeType = 'image/jpg');
 }
