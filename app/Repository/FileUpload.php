@@ -22,7 +22,7 @@ trait FileUpload
     private $compress = true;
     private $width = 1600;
     private $height = null;
-    private $storageProviders = 'qiniu';
+    private $storageProviders = 'aliyun';
     private $driver;
 
     public function __construct()
