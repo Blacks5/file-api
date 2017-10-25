@@ -82,7 +82,6 @@ $app->middleware([
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Overtrue\LaravelWechat\ServiceProvider::class);
-$app->register(ApolloPY\Flysystem\AliyunOss\AliyunOssServiceProvider::class);
 //$app->register(Overtrue\LaravelWeChat\ServiceProvider::class); //easyWeChat
 /*
 |--------------------------------------------------------------------------
@@ -94,7 +93,7 @@ $app->register(ApolloPY\Flysystem\AliyunOss\AliyunOssServiceProvider::class);
 | can respond to, as well as the controllers that may handle them.
 |
 */
-
+$app->configure('filesystem');
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
 ], function ($router) {
