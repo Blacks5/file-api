@@ -20,7 +20,5 @@ $router->group(['prefix'=> 'v1'], function () use ($router){
     $router->get('file', 'FileController@more');
     $router->get('file/{uuid}', 'FileController@show');
     $router->post('file', 'FileController@store');
-    $router->post('file/wechat', 'FileController@wechat');
-    $router->get('file/wechat', 'FileController@lists');
     $router->delete('file/{uuid}', 'FileController@destroy');
 });
