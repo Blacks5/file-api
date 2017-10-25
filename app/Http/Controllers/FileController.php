@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 
 class FileController extends Controller
 {
+    use FileUpload;
 
     public function index()
     {
@@ -26,7 +27,7 @@ class FileController extends Controller
     /**
      * 根据uuid获取图片链接
      * @param $uuid
-     * @return static
+     * @return Response
      * @author OneStep
      */
     public function show($uuid)
@@ -42,7 +43,7 @@ class FileController extends Controller
      * 批量获取图片链接地址
      * http://loaclhost/v1/file?images[]=xxxx&images[]=xxxxx
      * @param Request $request
-     * @return static
+     * @return Response
      * @author OneStep
      */
     public function more(Request $request)
@@ -52,7 +53,7 @@ class FileController extends Controller
         return Response::success([
             'path' => $files
         ]);
-        return false;
+        return Response::error(['message'=>'上传文件失败']);
     }
 
     /**
@@ -64,8 +65,7 @@ class FileController extends Controller
      */
     public function store(Request $request)
     {
-        $upload = new FileUpload();
-        $msg = $upload->AliyunUpload($request);
+        $msg = $this->upload($request);
 
         if($msg['status']==1){
             return Response::success([
@@ -82,8 +82,7 @@ class FileController extends Controller
      */
     public function wechat($media_id)
     {
-        $upload = new FileUpload();
-        $file = $upload->wechatUpload($media_id);
+        $file = $this->upload($media_id);
         if($file){
             return Response::success([
                 'data' => $file['data']
@@ -93,15 +92,10 @@ class FileController extends Controller
 
     public function lists()
     {
-        /*$app = new Application(config('wechat'));
+        $app = new Application(config('wechat'));
         $m = $app->material;
-        dd($m->lists('image',1,20));*/
-        $file = file_get_contents("https://mmbiz.qpic.cn/mmbiz_jpg/9UCDk3ibhRgHN24RM2uzibAwkV7C0qxoygiaUsqsKK1cynmOWYaVlboyPnkHK1LSTMjGEPZDexaNZTN5HR7B16ibmQ/640");
-        $msg = new FileUpload();
-        $fileName = 'images/'.date('Ymd').rand(1000,9999).'.jpg';
-        file_put_contents($fileName,$file);
-        $msg->wechatUpload($fileName);
-        //
+        dd($m->lists('image',1,20));
+
 
     }
 
