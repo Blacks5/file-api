@@ -38,10 +38,9 @@ class Aliyun implements BaseUpload
           ['ContentType' => $mimeType]
         );
          if($upload){
-             $this->destroyImg($filePath);
              return [
                  'uuid' => $uuid,
-                 'path' => $key,
+                 'path' => $key.$uuid,
              ];
          }
     }
