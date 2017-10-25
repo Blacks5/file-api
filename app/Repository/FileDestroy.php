@@ -10,6 +10,8 @@ namespace App\Repository;
 
 
 use App\Models\File;
+use App\Repository\Upload\Qiniu;
+use App\Services\OSS;
 
 class FileDestroy
 {
@@ -22,7 +24,15 @@ class FileDestroy
     public function destroyFile($uuid)
     {
         $file = File::where('uuid', $uuid)->firstOrFail();
-        $this->aliyunDestroy($file->path . $file->uuid);
+        switch ($file->provider){
+            case 'aliyun':
+                $this->aliyunDestroy($file->path);
+                break;
+            case 'qiniu':
+                $this->qiniuDestroy($file->path);
+                break;
+        }
+
         return $this->DbDestroy($file->id);
     }
 
@@ -35,6 +45,18 @@ class FileDestroy
     private function aliyunDestroy($path)
     {
         return OSS::publicDeleteObject(env('OSS_TEST_BUCKET'), $path);
+    }
+
+    /**
+     * 删除七牛云的图片
+     * @param $path
+     * @return bool|\Qiniu\Client|\Qiniu\Result
+     * @author OneStep
+     */
+    private function qiniuDestroy($path)
+    {
+        $destroy = new Qiniu();
+        return $destroy->destroy($path);
     }
 
     /**
