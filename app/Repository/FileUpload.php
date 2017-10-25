@@ -11,6 +11,7 @@ namespace App\Repository;
 
 use App\Models\File;
 use App\Repository\Upload\Aliyun;
+use App\Repository\Upload\Qiniu;
 use EasyWeChat\Foundation\Application;
 use Illuminate\Http\Request;
 use Intervention\Image\ImageManager;
@@ -21,7 +22,7 @@ trait FileUpload
     private $compress = true;
     private $width = 1600;
     private $height = null;
-    private $storageProviders = 'aliyun';
+    private $storageProviders = 'qiniu';
     private $driver;
 
     public function __construct()
@@ -46,11 +47,11 @@ trait FileUpload
     {
         $fileInfo = $this->getPath($request);
         $uuid = $this->getUuid();
-        $key = strtotime('Y/m/');
+        $path = date('Y/m/');
         $filePath = $fileInfo['path'];
         $mimeType = $fileInfo['mimeType'];
 
-        $upload = $this->driver->upload($key, $uuid, $filePath, $mimeType);
+        $upload = $this->driver->upload($path, $uuid, $filePath, $mimeType);
         if($upload){
             $data = $this->saveToDb($upload, $fileInfo['realName'], $this->storageProviders);
             $this->destroyImg($filePath);
