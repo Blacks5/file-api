@@ -9,7 +9,12 @@
 namespace App\Repository\Get;
 
 
-class BaseGet
+interface BaseGet
 {
-
+    /**
+     * @param $path
+     * @return mixed
+     * @author OneStep
+     */
+    public function getImg($path);
 }
