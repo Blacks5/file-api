@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "405b0aea67b5664be9ddbddd1d3c6799",
+    "content-hash": "8742bfbc6308e33f18530d755d35266c",
     "packages": [
         {
             "name": "doctrine/cache",
@@ -2439,6 +2439,48 @@
             "time": "2017-01-02T13:31:39+00:00"
         },
         {
+            "name": "qiniu/qiniu",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hfcorriez/php-qiniu.git",
+                "reference": "6b43b5020ec78b4cb68fb337ae8937c1679d5aef"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://files.phpcomposer.com/files/hfcorriez/php-qiniu/6b43b5020ec78b4cb68fb337ae8937c1679d5aef.zip",
+                "reference": "6b43b5020ec78b4cb68fb337ae8937c1679d5aef",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.9"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Qiniu": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Corrie Zhao",
+                    "email": "hfcorriez@gmail.com"
+                }
+            ],
+            "description": "Qiniu SDK",
+            "keywords": [
+                "api",
+                "cloud storage",
+                "qiniu",
+                "sdk"
+            ],
+            "time": "2016-04-14T15:38:21+00:00"
+        },
+        {
             "name": "ramsey/uuid",
             "version": "3.6.1",
             "source": {
@@ -4831,7 +4873,8 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "tnew/common": 20
+        "tnew/common": 20,
+        "qiniu/qiniu": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

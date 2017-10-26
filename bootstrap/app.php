@@ -93,7 +93,7 @@ $app->register(Overtrue\LaravelWechat\ServiceProvider::class);
 | can respond to, as well as the controllers that may handle them.
 |
 */
-
+$app->configure('filesystem');
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
 ], function ($router) {

@@ -10,6 +10,8 @@ namespace App\Repository;
 
 
 use App\Models\File;
+use App\Repository\Get\AliyunGet;
+use App\Repository\Get\QiniuGet;
 use Carbon\Carbon;
 
 class FileGet
@@ -23,8 +25,16 @@ class FileGet
     public function getFile($uuid)
     {
         $file = File::where('uuid', $uuid)->firstOrFail();
-
-        return $this->aliyunGetPrivateFile($file->path.$file->uuid);
+        switch ($file->provider){
+            case 'aliyun':
+                $providers = new AliyunGet();
+                return $providers->getImg($file->path);
+                break;
+            case 'qiniu':
+                $providers = new QiniuGet();
+                return $providers->getImg($file->path);
+                break;
+        }
     }
 
     /**
@@ -43,28 +53,5 @@ class FileGet
             }
         }
         return $data;
-    }
-
-    /**
-     * 获取阿里云公开链接
-     * @param $path
-     * @return string
-     * @author OneStep
-     */
-    private function aliyunGetPublicFile($path)
-    {
-        return OSS::getPublicObjectURL(env('OSS_TEST_BUCKET'), $path);
-
-    }
-
-    /**
-     * 获取阿里云私有链接(过期时间1天)
-     * @param $path
-     * @return mixed
-     * @author OneStep
-     */
-    private function aliyunGetPrivateFile($path)
-    {
-        return OSS::getPrivateObjectURLWithExpireTime(env('OSS_TEST_BUCKET'), $path, Carbon::now()->addDay(1));
     }
 }
