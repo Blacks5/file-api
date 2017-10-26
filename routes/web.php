@@ -15,10 +15,10 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->group(['prefix' => 'test'], function () use ($router) {
-    $router->get('temp', 'TestController@tempGet');
-    $router->post('temp', 'TestController@tempPost');
-    $router->put('temp', 'TestController@tempPut');
-    
-    $router->post('file', 'TestController@fileCreate');
+
+$router->group(['prefix'=> 'v1'], function () use ($router){
+    $router->get('file', 'FileController@more');
+    $router->get('file/{uuid}', 'FileController@show');
+    $router->post('file', 'FileController@store');
+    $router->delete('file/{uuid}', 'FileController@destroy');
 });

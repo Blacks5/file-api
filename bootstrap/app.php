@@ -73,7 +73,7 @@ $app->middleware([
 |--------------------------------------------------------------------------
 |
 | Here we will register all of the application's service providers which
-| are used to bind services into the container. Service providers are
+| are used to bind Services into the container. Service providers are
 | totally optional, so you are not required to uncomment this line.
 |
 */
@@ -81,7 +81,8 @@ $app->middleware([
 // $app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
-
+$app->register(Overtrue\LaravelWechat\ServiceProvider::class);
+//$app->register(Overtrue\LaravelWeChat\ServiceProvider::class); //easyWeChat
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes
@@ -92,7 +93,7 @@ $app->middleware([
 | can respond to, as well as the controllers that may handle them.
 |
 */
-
+$app->configure('filesystem');
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
 ], function ($router) {
