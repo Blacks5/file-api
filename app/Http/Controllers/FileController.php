@@ -10,21 +10,15 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Response;
-use App\Services\FileDestroy;
-use App\Services\FileGet;
-use App\Services\FileUpload;
-use App\Services\OSS;
-use Carbon\Carbon;
+use App\Repository\FileDestroy;
+use App\Repository\FileGet;
+use App\Repository\FileUpload;
+use EasyWeChat\Foundation\Application;
 use Illuminate\Http\Request;
-use Ramsey\Uuid\Uuid;
 
 class FileController extends Controller
 {
-    private $bucket = '';
-    public function __construct()
-    {
-        $this->bucket = env('OSS_TEST_BUCKET');
-    }
+    use FileUpload;
 
     public function index()
     {
@@ -34,7 +28,7 @@ class FileController extends Controller
     /**
      * 根据uuid获取图片链接
      * @param $uuid
-     * @return static
+     * @return Response
      * @author OneStep
      */
     public function show($uuid)
@@ -50,7 +44,7 @@ class FileController extends Controller
      * 批量获取图片链接地址
      * http://loaclhost/v1/file?images[]=xxxx&images[]=xxxxx
      * @param Request $request
-     * @return static
+     * @return Response
      * @author OneStep
      */
     public function more(Request $request)
@@ -60,20 +54,18 @@ class FileController extends Controller
         return Response::success([
             'path' => $files
         ]);
-        return false;
+        return Response::error(['message'=>'上传文件失败']);
     }
 
     /**
      * 上传文件
-     * fileName 2017/10/...
-     * @param Request $request
-     * @return static
+     * @param Request $request->file('image')
+     * @return Response
      * @author OneStep
      */
     public function store(Request $request)
     {
-        $upload = new FileUpload();
-        $msg = $upload->AliyunUpload($request);
+        $msg = $this->upload($request);
 
         if($msg['status']==1){
             return Response::success([
@@ -82,6 +74,37 @@ class FileController extends Controller
         }
     }
 
+    /**
+     * 获取微信图片上传到OSS
+     * @param $media_id
+     * @return Response
+     * @author OneStep
+     */
+    public function wechat($media_id)
+    {
+        $file = $this->upload($media_id);
+        if($file){
+            return Response::success([
+                'data' => $file['data']
+            ]);
+        }
+    }
+
+    public function lists()
+    {
+        $app = new Application(config('wechat'));
+        $m = $app->material;
+        dd($m->lists('image',1,20));
+
+
+    }
+
+    /**
+     * 删除图片及数据库信息
+     * @param $uuid
+     * @return Response
+     * @author OneStep
+     */
     public function destroy($uuid)
     {
         $destroy = new FileDestroy();
