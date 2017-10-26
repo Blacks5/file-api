@@ -13,7 +13,7 @@
 > 上传照片
 
 - POST参数
-```json
+```
 # 微信medie-id
 {
     image:'media-id'
