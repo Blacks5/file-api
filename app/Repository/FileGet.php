@@ -9,6 +9,7 @@
 namespace App\Repository;
 
 
+use App\Exceptions\BusinessException;
 use App\Models\File;
 use App\Repository\Get\AliyunGet;
 use App\Repository\Get\QiniuGet;
@@ -24,7 +25,11 @@ class FileGet
      */
     public function getFile($uuid)
     {
-        $file = File::where('uuid', $uuid)->firstOrFail();
+        $file = File::where('uuid', $uuid)->first();
+        if(empty($file)){
+            throw new BusinessException('PARAMETER_ERROR','请提交正确的UUID');
+        }
+
         switch ($file->provider){
             case 'aliyun':
                 $providers = new AliyunGet();

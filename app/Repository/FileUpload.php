@@ -9,6 +9,7 @@
 namespace App\Repository;
 
 
+use App\Exceptions\BusinessException;
 use App\Models\File;
 use App\Repository\Upload\Aliyun;
 use App\Repository\Upload\Qiniu;
@@ -52,12 +53,10 @@ trait FileUpload
         $mimeType = $fileInfo['mimeType'];
 
         $upload = $this->driver->upload($path, $uuid, $filePath, $mimeType);
-        if($upload){
-            $data = $this->saveToDb($upload, $fileInfo['realName'], $this->storageProviders);
-            $this->destroyImg($filePath);
-            return ['status'=>$data['status'], 'message'=>$data['message'],'data'=>$data];
-        }
-        return ['status'=>0, 'message'=>'上传文件失败', 'data'=>''];
+        $data = $this->saveToDb($upload, $fileInfo['realName'], $this->storageProviders);
+
+        $this->destroyImg($filePath);
+        return $data;
     }
 
     /**
@@ -96,7 +95,7 @@ trait FileUpload
     private function getPath(Request $request)
     {
         //判断上传文件还是微信media_id
-        if(empty($request->file('image'))){
+        if(empty($request->file())){
             $filePath = $this->getWeChatFile($request->input('image'));
 
             $fileMimeType = 'image/jpeg';
@@ -136,16 +135,19 @@ trait FileUpload
      */
     private function saveToDb($info, $realName, $provider)
     {
-        $file = new File();
-        $file->uuid = $info['uuid'];
-        $file->path = $info['path'];
-        $file->original_name = $realName;
-        $file->provider = $provider;
-        //$file->extended_data = $info; 扩展数据 json格式  暂时不用
-        if($file->save()){
-            return $this->getReturnMessage($info, $realName, $provider);
+        try{
+            $file = new File();
+            $file->uuid = $info['uuid'];
+            $file->path = $info['path'];
+            $file->original_name = $realName;
+            $file->provider = $provider;
+            $file->save();
+        }catch (\Exception $exception){
+            throw new BusinessException('SERVER_ERROR','数据保存失败'.$exception->getMessage());
         }
-        return ['status'=>0, 'message'=>'文件保存数据库失败'];
+
+        return $this->getReturnMessage($info, $realName, $provider);
+
     }
 
     /**
@@ -158,13 +160,13 @@ trait FileUpload
      */
     private function getReturnMessage($info, $realName,$provider)
     {
+        $getFile = new FileGet();
         return $data = [
-            'status' => 1,
-            'message' => '文件保存成功',
             'realName' => $realName,
             'uuid' => $info['uuid'],
             'path' => $info['path'],
-            'provider' => $provider
+            'provider' => $provider,
+            'url' => $getFile->getFile($info['uuid'])
         ];
     }
 

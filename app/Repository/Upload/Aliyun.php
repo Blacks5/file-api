@@ -9,6 +9,7 @@
 namespace App\Repository\Upload;
 
 
+use App\Exceptions\BusinessException;
 use App\Services\OSS;
 
 class Aliyun implements BaseUpload
@@ -31,17 +32,20 @@ class Aliyun implements BaseUpload
      */
     public function upload($key, $uuid,$filePath, $mimeType = 'image/jpeg')
     {
-        $upload = OSS::publicUpload(
-          $this->bucket,
-          $key.$uuid,
-          $filePath,
-          ['ContentType' => $mimeType]
-        );
-         if($upload){
-             return [
-                 'uuid' => $uuid,
-                 'path' => $key.$uuid,
-             ];
-         }
+        try{
+            OSS::publicUpload(
+                $this->bucket,
+                $key.$uuid,
+                $filePath,
+                ['ContentType' => $mimeType]
+            );
+        }catch (\Exception $exception){
+            throw new BusinessException('PARAMETER_ERROR','上传图片失败'. $exception->getMessage());
+        }
+
+         return [
+             'uuid' => $uuid,
+             'path' => $key.$uuid,
+         ];
     }
 }
