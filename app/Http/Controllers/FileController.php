@@ -35,9 +35,7 @@ class FileController extends Controller
     {
         $get = new FileGet();
         $file = $get->getFile($uuid);
-        return Response::success([
-            'path' => $file
-        ]);
+        return Response::success($file);
     }
 
     /**
@@ -51,10 +49,7 @@ class FileController extends Controller
     {
         $get = new FileGet();
         $files = $get->getMoreFile($request->input('images'));
-        return Response::success([
-            'path' => $files
-        ]);
-        return Response::error(['message'=>'上传文件失败']);
+        return Response::success($files);
     }
 
     /**
@@ -67,11 +62,7 @@ class FileController extends Controller
     {
         $msg = $this->upload($request);
 
-        if($msg['status']==1){
-            return Response::success([
-                'data' => $msg['data']
-            ]);
-        }
+        return Response::success($msg);
     }
 
     /**
@@ -83,11 +74,7 @@ class FileController extends Controller
     public function wechat($media_id)
     {
         $file = $this->upload($media_id);
-        if($file){
-            return Response::success([
-                'data' => $file['data']
-            ]);
-        }
+        return Response::success($file);
     }
 
     public function lists()
@@ -108,12 +95,8 @@ class FileController extends Controller
     public function destroy($uuid)
     {
         $destroy = new FileDestroy();
-        if($destroy->destroyFile($uuid)){
-            return Response::success([
-                'status' => 1,
-                'message' => '删除成功!'
-            ]);
-        }
+        $destroy->destroyFile($uuid);
+        return Response::success('删除成功!');
     }
 
 }

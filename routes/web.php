@@ -17,8 +17,8 @@ $router->get('/', function () use ($router) {
 
 
 $router->group(['prefix'=> 'v1'], function () use ($router){
-    $router->get('file', 'FileController@more');
-    $router->get('file/{uuid}', 'FileController@show');
-    $router->post('file', 'FileController@store');
-    $router->delete('file/{uuid}', 'FileController@destroy');
+    $router->get('files/images', 'FileController@more');
+    $router->get('files/{uuid}', 'FileController@show');
+    $router->post('files', 'FileController@store');
+    $router->delete('files/{uuid}', 'FileController@destroy');
 });
