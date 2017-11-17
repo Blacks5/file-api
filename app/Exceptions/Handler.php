@@ -60,6 +60,9 @@ class Handler extends ExceptionHandler
                 break;
             }
         }
+        if(is_a($e, BusinessException::class)){
+            return Response::error($e->getBusinessCode(), $e->getMessage());
+        }
         return parent::render($request, $e);
     }
 }
