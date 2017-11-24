@@ -16,7 +16,7 @@ $router->get('/', function () use ($router) {
 });
 
 
-$router->group(['prefix'=> 'v1'], function () use ($router){
+$router->group(['prefix'=> 'v1', 'middleware' => 'auth'], function () use ($router){
     $router->get('files/images', 'FileController@more');
     $router->get('files/{uuid}', 'FileController@show');
     $router->post('files', 'FileController@store');
